@@ -8,18 +8,19 @@
 
 (defmethod initialize-instance :around ((object geometry) &key (wkt "POINT(0 0)") (srid nil))
   (with-geos
-    (setf (geometry-pointer object) (geos-geometry-from-wkt wkt))
+    (setf (geometry-pointer object) (cl-geos.bindings:geometry-from-wkt wkt))
     (when srid
-      (setf (geos-geometry-srid object) srid))))
+      (setf (geometry-srid object) srid))))
 
 (defmethod geometry-srid ((object geometry))
   (with-geos
-    (geos-geometry-get-srid (geometry-pointer object))))
+    (cl-geos.bindings:geometry-get-srid (geometry-pointer object))))
 
 (defmethod (setf geometry-srid) ((new-value integer) (object geometry))
   (with-geos
-    (geos-geometry-set-srid (geometry-pointer object) new-value)
+    (cl-geos.bindings:geometry-set-srid (geometry-pointer object) new-value)
     new-value))
 
 (defmethod geometry-type ((object geometry))
-  (geos-geometry-type-id (geometry-pointer object)))
+  (with-geos
+    (cl-geos.bindings:geometry-type-id (geometry-pointer object))))

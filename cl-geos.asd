@@ -5,7 +5,14 @@
   :description "Describe cl-geos here"
   :author "Alexander Dinu <aluuu@husa.su>"
   :license "Specify license here"
-  :depends-on (#:cffi #:cl-utilities)
+  :depends-on (#:cl-geos.bindings)
   :components ((:file "package")
-               (:file "cl-geos")
-               (:file "bindings")))
+               (:file "cl-geos")))
+
+(asdf:defsystem #:cl-geos.bindings
+  :serial t
+  :description "Describe cl-geos here"
+  :author "Alexander Dinu <aluuu@husa.su>"
+  :license "Specify license here"
+  :depends-on (#:cffi #:cl-utilities)
+  :components ((:file "bindings")))

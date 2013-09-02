@@ -1,6 +1,30 @@
 ;;;; bindings.lisp
 
-(in-package #:cl-geos)
+(defpackage #:cl-geos.bindings
+  (:use #:cl #:cffi #:cl-utilities)
+  (:export #:with-geos
+           #:geos-error
+           #:geometry-from-wkt
+           #:geometry-to-wkt
+           #:geometry-destroy
+           #:geometry-type
+           #:geometry-type-id
+           #:geometry-set-srid
+           #:geometry-get-srid
+           #:geometry-get-num-geometries
+           #:geometry-get-geometry-n
+           #:coordseq-create
+           #:coordseq-destroy
+           #:coordseq-setx
+           #:coordseq-getx
+           #:coordseq-sety
+           #:coordseq-gety
+           #:coordseq-setz
+           #:coordseq-getz
+           #:coordseq-set-ordinate
+           #:coordseq-get-ordinate))
+
+(in-package #:cl-geos.bindings)
 
 (defparameter *geos-context-handle* nil)
 
@@ -12,6 +36,18 @@
 
 (defun geos-error (message)
   (error 'geos-error :message message))
+
+(defmacro with-geos (&body body)
+  `(let* ((*geos-context-handle* (geos-init))
+          (result (progn ,@body)))
+     (geos-finish *geos-context-handle*)
+     result))
+
+(defmacro defgeos (name args &body body)
+  `(defun ,name ,args
+     (if (null *geos-context-handle*)
+         (error (format nil "You must call #'~a function inside WITH-GEOS macro or manually call GEOS-INIT at the beginning of your program" ,(symbol-name name)))
+         (progn ,@body))))
 
 (define-foreign-library libgeos
   (:unix (:or "libgeos_c.so.1" "libgeos_c.so"))
@@ -102,18 +138,6 @@
   (handle %ContextHandle)
   (geometry %Geometry)
   (n :int))
-
-(defmacro with-geos (&body body)
-  `(let* ((*geos-context-handle* (geos-init))
-          (result (progn ,@body)))
-     (geos-finish *geos-context-handle*)
-     result))
-
-(defmacro defgeos (name args &body body)
-  `(defun ,(intern (concatenate 'string "GEOS-" (symbol-name name))) ,args
-     (if (null *geos-context-handle*)
-         (error (format nil "You must call #'~a function inside WITH-GEOS macro or manually call GEOS-INIT at the beginning of your program" ,(symbol-name name)))
-         (progn ,@body))))
 
 (defgeos geometry-from-wkt (string)
   "CHECK VERSION! DEPRICATED"
@@ -255,30 +279,30 @@
   (GEOSCoordSeq-SetX-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
 
 (defgeos coordseq-getx (coordseq idx)
-  (with-foreign-object (value :int)
+  (with-foreign-object (value :double)
     (GEOSCoordSeq-getX-r *geos-context-handle* coordseq idx value)
-    (mem-ref value :int)))
+    (mem-ref value :double)))
 
 (defgeos coordseq-sety (coordseq idx value)
   (GEOSCoordSeq-setY-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
 
 (defgeos coordseq-gety (coordseq idx)
-  (with-foreign-object (value :int)
+  (with-foreign-object (value :double)
     (GEOSCoordSeq-getY-r *geos-context-handle* coordseq idx value)
-    (mem-ref value :int)))
+    (mem-ref value :double)))
 
 (defgeos coordseq-setz (coordseq idx value)
   (GEOSCoordSeq-setZ-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
 
 (defgeos coordseq-getz (coordseq idx)
-  (with-foreign-object (value :int)
+  (with-foreign-object (value :double)
     (GEOSCoordSeq-getZ-r *geos-context-handle* coordseq idx value)
-    (mem-ref value :int)))
+    (mem-ref value :double)))
 
 (defgeos coordseq-set-ordinate (coordseq idx dim value)
   (GEOSCoordSeq-setOrdinate-r *geos-context-handle* coordseq idx dim (coerce value 'double-float)))
 
 (defgeos coordseq-get-ordinate (coordseq idx dim)
-  (with-foreign-object (value :int)
+  (with-foreign-object (value :double)
     (GEOSCoordSeq-getOrdinate-r *geos-context-handle* coordseq idx dim value)
-    (mem-ref value :int)))
+    (mem-ref value :double)))
