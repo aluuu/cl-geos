@@ -1,29 +1,4 @@
 ;;;; bindings.lisp
-
-(defpackage #:cl-geos.bindings
-  (:use #:cl #:cffi #:cl-utilities)
-  (:export #:with-geos
-           #:geos-error
-           #:geometry-from-wkt
-           #:geometry-to-wkt
-           #:geometry-destroy
-           #:geometry-type
-           #:geometry-type-id
-           #:geometry-set-srid
-           #:geometry-get-srid
-           #:geometry-get-num-geometries
-           #:geometry-get-geometry-n
-           #:coordseq-create
-           #:coordseq-destroy
-           #:coordseq-setx
-           #:coordseq-getx
-           #:coordseq-sety
-           #:coordseq-gety
-           #:coordseq-setz
-           #:coordseq-getz
-           #:coordseq-set-ordinate
-           #:coordseq-get-ordinate))
-
 (in-package #:cl-geos.bindings)
 
 (defparameter *geos-context-handle* nil)
@@ -89,6 +64,10 @@
     (finishGEOS-r *geos-context-handle*))
   (setf *geos-context-handle* nil))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GEOSGeom_* bindings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defctype %Geometry :pointer)
 
 (defcenum %GeomTypes
@@ -151,8 +130,8 @@
 (defgeos geometry-destroy (geometry)
   (GEOSGeom-destroy-r *geos-context-handle* geometry))
 
-(defgeos geometry-type (geometry)
-  (foreign-string-to-lisp (GEOSGeomType-r *geos-context-handle* geometry)))
+;; (defgeos geometry-type (geometry)
+;;   (foreign-string-to-lisp (GEOSGeomType-r *geos-context-handle* geometry)))
 
 (defgeos geometry-type-id (geometry)
   (GEOSGeomTypeId-r *geos-context-handle* geometry))
@@ -172,29 +151,11 @@
    later version it doesn't matter (getGeometryN(0) for a single will return the input)."
   (GEOSGetGeometryN-r *geos-context-handle* geometry n))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GEOSCoordSeq_* bindings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defctype %CoordSeq :pointer)
-
-(defctype %WKTReader :pointer)
-
-(defctype %WKTWriter :pointer)
-
-(defctype %WKBReader :pointer)
-
-(defctype %WKBWriter :pointer)
-
-(defcenum %ByteOrders
-  (:WKB_XDR 0)
-  (:WKB_NDR 1))
-
-(defcenum %BufCapStyles
-  (:cap-round 1)
-  (:cap-flat 2)
-  (:cat-square 3))
-
-(defcenum %BufJoinStyles
-  (:join-round 1)
-  (:join-mitre 2)
-  (:join-bevel 3))
 
 (defcfun "GEOSCoordSeq_create_r" %CoordSeq
   (handle %ContextHandle)
@@ -306,3 +267,25 @@
   (with-foreign-object (value :double)
     (GEOSCoordSeq-getOrdinate-r *geos-context-handle* coordseq idx dim value)
     (mem-ref value :double)))
+
+(defctype %WKTReader :pointer)
+
+(defctype %WKTWriter :pointer)
+
+(defctype %WKBReader :pointer)
+
+(defctype %WKBWriter :pointer)
+
+(defcenum %ByteOrders
+  (:WKB_XDR 0)
+  (:WKB_NDR 1))
+
+(defcenum %BufCapStyles
+  (:cap-round 1)
+  (:cap-flat 2)
+  (:cat-square 3))
+
+(defcenum %BufJoinStyles
+  (:join-round 1)
+  (:join-mitre 2)
+  (:join-bevel 3))

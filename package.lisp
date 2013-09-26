@@ -1,4 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:cl-geos
-  (:use #:cl #:cl-geos.bindings))
+  (:use #:cl #:cl-geos.bindings)
+  (:export #:geometry
+           #:geometry-type
+           #:geometry-srid))

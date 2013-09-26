@@ -1,18 +1,15 @@
 ;;;; cl-geos.asd
-
 (asdf:defsystem #:cl-geos
   :serial t
   :description "Describe cl-geos here"
   :author "Alexander Dinu <aluuu@husa.su>"
   :license "Specify license here"
-  :depends-on (#:cl-geos.bindings)
-  :components ((:file "package")
-               (:file "cl-geos")))
+  :depends-on (#:cffi #:cl-utilities #:fiveam)
+  :components ((:module "bindings"
+                :pathname "bindings/"
+                :serial t
+                :components ((:file "package")
+                             (:file "bindings")))
 
-(asdf:defsystem #:cl-geos.bindings
-  :serial t
-  :description "Describe cl-geos here"
-  :author "Alexander Dinu <aluuu@husa.su>"
-  :license "Specify license here"
-  :depends-on (#:cffi #:cl-utilities)
-  :components ((:file "bindings")))
+               (:file "package")
+               (:file "cl-geos")))
