@@ -4,4 +4,5 @@
   (:use #:cl #:cl-geos.bindings)
   (:export #:geometry
            #:geometry-type
-           #:geometry-srid))
+           #:geometry-srid
+           #:geometry-size))

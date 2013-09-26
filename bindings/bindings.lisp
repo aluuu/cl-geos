@@ -118,6 +118,10 @@
   (geometry %Geometry)
   (n :int))
 
+(defcfun "GEOSGeomGetNumPoints_r" :int
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
 (defgeos geometry-from-wkt (string)
   "CHECK VERSION! DEPRICATED"
   (with-foreign-string (foreign-string string)
@@ -144,6 +148,9 @@
 
 (defgeos geometry-get-num-geometries (geometry)
   (GEOSGetNumGeometries-r *geos-context-handle* geometry))
+
+(defgeos geometry-get-num-points (geometry)
+  (GEOSGeomGetNumPoints-r *geos-context-handle* geometry))
 
 (defgeos geometry-get-geometry-n (geometry n)
   "CHECK VERSION!

@@ -11,6 +11,7 @@
            #:geometry-get-srid
            #:geometry-get-num-geometries
            #:geometry-get-geometry-n
+           #:geometry-get-num-points
            #:coordseq-create
            #:coordseq-destroy
            #:coordseq-setx
