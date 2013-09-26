@@ -12,4 +12,10 @@
                              (:file "bindings")))
 
                (:file "package")
-               (:file "cl-geos")))
+               (:file "cl-geos")
+
+               (:module "tests"
+                :pathname "tests/"
+                :serial t
+                :components ((:file "package")
+                             (:file "tests")))))
