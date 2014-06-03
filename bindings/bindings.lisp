@@ -18,11 +18,11 @@
      (geos-finish *geos-context-handle*)
      result))
 
-(defmacro defgeos (name args &body body)
+(defmacro defgeos (name args &body forms)
   `(defun ,name ,args
      (if (null *geos-context-handle*)
          (error (format nil "You must call #'~a function inside WITH-GEOS macro or manually call GEOS-INIT at the beginning of your program" ,(symbol-name name)))
-         (progn ,@body))))
+         (progn ,@forms))))
 
 (define-foreign-library libgeos
   (:unix (:or "libgeos_c.so.1" "libgeos_c.so"))
@@ -92,10 +92,6 @@
   (handle %ContextHandle)
   (geometry %Geometry))
 
-(defcfun "GEOSGeomType_r" :pointer
-  (handle %ContextHandle)
-  (geometry %Geometry))
-
 (defcfun "GEOSGeomTypeId_r" %GeomTypes
   (handle %ContextHandle)
   (geometry %Geometry))
@@ -134,9 +130,6 @@
 (defgeos geometry-destroy (geometry)
   (GEOSGeom-destroy-r *geos-context-handle* geometry))
 
-;; (defgeos geometry-type (geometry)
-;;   (foreign-string-to-lisp (GEOSGeomType-r *geos-context-handle* geometry)))
-
 (defgeos geometry-type-id (geometry)
   (GEOSGeomTypeId-r *geos-context-handle* geometry))
 
@@ -157,6 +150,92 @@
    Up to GEOS 3.2.0 the input geometry must be a Collection, in
    later version it doesn't matter (getGeometryN(0) for a single will return the input)."
   (GEOSGetGeometryN-r *geos-context-handle* geometry n))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Topology operations
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defcfun "GEOSEnvelope_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSIntersection_r" %Geometry
+  (handle %ContextHandle)
+  (geometry1 %Geometry)
+  (geometry2 %Geometry))
+
+(defcfun "GEOSConvexHull_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSDifference_r" %Geometry
+  (handle %ContextHandle)
+  (geometry1 %Geometry)
+  (geometry2 %Geometry))
+
+(defcfun "GEOSSymDifference_r" %Geometry
+  (handle %ContextHandle)
+  (geometry1 %Geometry)
+  (geometry2 %Geometry))
+
+(defcfun "GEOSBoundary_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSUnion_r" %Geometry
+  (handle %ContextHandle)
+  (geometry1 %Geometry)
+  (geometry2 %Geometry))
+
+(defcfun "GEOSUnaryUnion_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSUnionCascaded_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSPointOnSurface_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSGetCentroid_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defcfun "GEOSNode_r" %Geometry
+  (handle %ContextHandle)
+  (geometry %Geometry))
+
+(defgeos geometry-envelope (geometry)
+  (GEOSEnvelope-r *geos-context-handle* geometry))
+
+(defgeos geomerty-intersection (geometry1 geometry2)
+  (GEOSIntersection-r *geos-context-handle* geometry1 geometry2))
+
+(defgeos geomerty-convex-hull (geometry)
+  (GEOSConvexHull-r *geos-context-handle* geometry))
+
+(defgeos geomerty-difference (geometry1 geometry2)
+  (GEOSDifference-r *geos-context-handle* geometry1 geometry2))
+
+(defgeos geomerty-sym-difference (geometry1 geometry2)
+  (GEOSSymDifference-r *geos-context-handle* geometry1 geometry2))
+
+(defgeos geomerty-boundary (geometry)
+  (GEOSBoundary-r *geos-context-handle* geometry))
+
+(defgeos geomerty-union (geometry1 geometry2)
+  (GEOSUnion-r *geos-context-handle* geometry1 geometry2))
+
+(defgeos geomerty-unary-union (geometry)
+  (GEOSUnaryUnion-r *geos-context-handle* geometry))
+
+(defgeos geomerty-union-cascaded (geometry)
+  (GEOSUnionCascaded-r *geos-context-handle* geometry))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GEOSCoordSeq_* bindings

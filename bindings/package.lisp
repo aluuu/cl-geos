@@ -5,13 +5,15 @@
            #:geometry-from-wkt
            #:geometry-to-wkt
            #:geometry-destroy
-           ;; #:geometry-type
            #:geometry-type-id
            #:geometry-set-srid
            #:geometry-get-srid
            #:geometry-get-num-geometries
            #:geometry-get-geometry-n
            #:geometry-get-num-points
+
+           #:geometry-envelope
+
            #:coordseq-create
            #:coordseq-destroy
            #:coordseq-setx

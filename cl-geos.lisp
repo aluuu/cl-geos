@@ -30,3 +30,7 @@
     (if (equal :linestring (geometry-type object))
         (cl-geos.bindings:geometry-get-num-points (geometry-pointer object))
         (cl-geos.bindings:geometry-get-num-geometries (geometry-pointer object)))))
+
+(defmethod geometry-envelope ((object geometry))
+  (with-geos
+    (cl-geos.bindings:geometry-envelope (geometry-pointer object))))
