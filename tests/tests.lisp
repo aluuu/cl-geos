@@ -21,7 +21,7 @@
     (is (= (geometry-srid simple-point) 0))
     (is (= (geometry-size simple-point) 1))))
 
-(test linstring-creation
+(test linestring-creation
   (for-all ((simple-line #'(lambda () (make-instance 'cl-geos:geometry :wkt (gen-wkt :linestring :length 5)))))
     (is (eq (geometry-type simple-line) :linestring))
     (is (= (geometry-srid simple-line) 0))
