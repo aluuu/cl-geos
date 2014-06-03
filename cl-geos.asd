@@ -4,7 +4,7 @@
   :description "Describe cl-geos here"
   :author "Alexander Dinu <aluuu@husa.su>"
   :license "Specify license here"
-  :depends-on (#:cffi #:cl-utilities #:fiveam)
+  :depends-on (#:cffi #:cl-utilities #:fiveam #:rutils)
   :components ((:module "bindings"
                 :pathname "bindings/"
                 :serial t

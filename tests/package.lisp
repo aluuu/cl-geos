@@ -1,2 +1,2 @@
 (defpackage #:cl-geos.tests
-  (:use #:cl #:fiveam #:cl-geos))
+  (:use #:cl #:fiveam #:cl-geos #:rutils))
