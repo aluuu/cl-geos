@@ -42,4 +42,5 @@
     (is (= (geometry-srid simple-polygon) 0))
     (is (= (geometry-size simple-polygon) 1))))
 
-(run! 'geometry-suite)
+(defun run-tests ()
+  (run! 'geometry-suite))

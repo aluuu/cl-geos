@@ -1,8 +1,6 @@
 ;;;; bindings.lisp
 (in-package #:cl-geos.bindings)
 
-(defparameter *geos-context-handle* nil)
-
 (define-condition geos-error (error)
   ((message :initarg :message :reader geos-error-message))
   (:report
@@ -11,18 +9,6 @@
 
 (defun geos-error (message)
   (error 'geos-error :message message))
-
-(defmacro with-geos (&body body)
-  `(let* ((*geos-context-handle* (geos-init))
-          (result (progn ,@body)))
-     (geos-finish *geos-context-handle*)
-     result))
-
-(defmacro defgeos (name args &body forms)
-  `(defun ,name ,args
-     (if (null *geos-context-handle*)
-         (error (format nil "You must call #'~a function inside WITH-GEOS macro or manually call GEOS-INIT at the beginning of your program" ,(symbol-name name)))
-         (progn ,@forms))))
 
 (define-foreign-library libgeos
   (:unix (:or "libgeos_c.so.1" "libgeos_c.so"))
@@ -59,10 +45,9 @@
 (defun geos-init ()
   (initGEOS-r (get-callback 'geos-notice-handler) (get-callback 'geos-error-handler)))
 
-(defun geos-finish (*geos-context-handle*)
-  (when *geos-context-handle*
-    (finishGEOS-r *geos-context-handle*))
-  (setf *geos-context-handle* nil))
+(defun geos-finish (ctx)
+  (when ctx
+    (finishGEOS-r ctx)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GEOSGeom_* bindings
@@ -118,38 +103,38 @@
   (handle %ContextHandle)
   (geometry %Geometry))
 
-(defgeos geometry-from-wkt (string)
+(defun geometry-from-wkt (ctx string)
   "CHECK VERSION! DEPRICATED"
   (with-foreign-string (foreign-string string)
-    (GEOSGeomFromWKT-r *geos-context-handle* foreign-string)))
+    (GEOSGeomFromWKT-r ctx foreign-string)))
 
-(defgeos geometry-to-wkt (geometry)
+(defun geometry-to-wkt (ctx geometry)
   "CHECK VERSION! DEPRICATED"
-  (foreign-string-to-lisp (GEOSGeomToWKT-r *geos-context-handle* geometry)))
+  (foreign-string-to-lisp (GEOSGeomToWKT-r ctx geometry)))
 
-(defgeos geometry-destroy (geometry)
-  (GEOSGeom-destroy-r *geos-context-handle* geometry))
+(defun geometry-destroy (ctx geometry)
+  (GEOSGeom-destroy-r ctx geometry))
 
-(defgeos geometry-type-id (geometry)
-  (GEOSGeomTypeId-r *geos-context-handle* geometry))
+(defun geometry-type-id (ctx geometry)
+  (GEOSGeomTypeId-r ctx geometry))
 
-(defgeos geometry-get-srid (geometry)
-  (GEOSGetSRID-r *geos-context-handle* geometry))
+(defun geometry-get-srid (ctx geometry)
+  (GEOSGetSRID-r ctx geometry))
 
-(defgeos geometry-set-srid (geometry srid)
-  (GEOSSetSRID-r *geos-context-handle* geometry srid))
+(defun geometry-set-srid (ctx geometry srid)
+  (GEOSSetSRID-r ctx geometry srid))
 
-(defgeos geometry-get-num-geometries (geometry)
-  (GEOSGetNumGeometries-r *geos-context-handle* geometry))
+(defun geometry-get-num-geometries (ctx geometry)
+  (GEOSGetNumGeometries-r ctx geometry))
 
-(defgeos geometry-get-num-points (geometry)
-  (GEOSGeomGetNumPoints-r *geos-context-handle* geometry))
+(defun geometry-get-num-points (ctx geometry)
+  (GEOSGeomGetNumPoints-r ctx geometry))
 
-(defgeos geometry-get-geometry-n (geometry n)
+(defun geometry-get-geometry-n (ctx geometry n)
   "CHECK VERSION!
    Up to GEOS 3.2.0 the input geometry must be a Collection, in
    later version it doesn't matter (getGeometryN(0) for a single will return the input)."
-  (GEOSGetGeometryN-r *geos-context-handle* geometry n))
+  (GEOSGetGeometryN-r ctx geometry n))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -209,32 +194,32 @@
   (handle %ContextHandle)
   (geometry %Geometry))
 
-(defgeos geometry-envelope (geometry)
-  (GEOSEnvelope-r *geos-context-handle* geometry))
+(defun geometry-envelope (ctx geometry)
+  (GEOSEnvelope-r ctx geometry))
 
-(defgeos geomerty-intersection (geometry1 geometry2)
-  (GEOSIntersection-r *geos-context-handle* geometry1 geometry2))
+(defun geometry-intersection (ctx geometry1 geometry2)
+  (GEOSIntersection-r ctx geometry1 geometry2))
 
-(defgeos geomerty-convex-hull (geometry)
-  (GEOSConvexHull-r *geos-context-handle* geometry))
+(defun geometry-convex-hull (ctx geometry)
+  (GEOSConvexHull-r ctx geometry))
 
-(defgeos geomerty-difference (geometry1 geometry2)
-  (GEOSDifference-r *geos-context-handle* geometry1 geometry2))
+(defun geometry-difference (ctx geometry1 geometry2)
+  (GEOSDifference-r ctx geometry1 geometry2))
 
-(defgeos geomerty-sym-difference (geometry1 geometry2)
-  (GEOSSymDifference-r *geos-context-handle* geometry1 geometry2))
+(defun geometry-sym-difference (ctx geometry1 geometry2)
+  (GEOSSymDifference-r ctx geometry1 geometry2))
 
-(defgeos geomerty-boundary (geometry)
-  (GEOSBoundary-r *geos-context-handle* geometry))
+(defun geometry-boundary (ctx geometry)
+  (GEOSBoundary-r ctx geometry))
 
-(defgeos geomerty-union (geometry1 geometry2)
-  (GEOSUnion-r *geos-context-handle* geometry1 geometry2))
+(defun geometry-union (ctx geometry1 geometry2)
+  (GEOSUnion-r ctx geometry1 geometry2))
 
-(defgeos geomerty-unary-union (geometry)
-  (GEOSUnaryUnion-r *geos-context-handle* geometry))
+(defun geometry-unary-union (ctx geometry)
+  (GEOSUnaryUnion-r ctx geometry))
 
-(defgeos geomerty-union-cascaded (geometry)
-  (GEOSUnionCascaded-r *geos-context-handle* geometry))
+(defun geometry-union-cascaded (ctx geometry)
+  (GEOSUnionCascaded-r ctx geometry))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -316,42 +301,42 @@
   (handle %ContextHandle)
   (geometry %Geometry))
 
-(defgeos coordseq-create (size dims)
-  (GEOSCoordSeq-create-r *geos-context-handle* size dims))
+(defun coordseq-create (ctx size dims)
+  (GEOSCoordSeq-create-r ctx size dims))
 
-(defgeos coordseq-destroy (coordseq)
-  (GEOSCoordSeq-destroy-r *geos-context-handle* coordseq))
+(defun coordseq-destroy (ctx coordseq)
+  (GEOSCoordSeq-destroy-r ctx coordseq))
 
-(defgeos coordseq-setx (coordseq idx value)
-  (GEOSCoordSeq-SetX-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
+(defun coordseq-setx (ctx coordseq idx value)
+  (GEOSCoordSeq-SetX-r ctx coordseq idx (coerce value 'double-float)))
 
-(defgeos coordseq-getx (coordseq idx)
+(defun coordseq-getx (ctx coordseq idx)
   (with-foreign-object (value :double)
-    (GEOSCoordSeq-getX-r *geos-context-handle* coordseq idx value)
+    (GEOSCoordSeq-getX-r ctx coordseq idx value)
     (mem-ref value :double)))
 
-(defgeos coordseq-sety (coordseq idx value)
-  (GEOSCoordSeq-setY-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
+(defun coordseq-sety (ctx coordseq idx value)
+  (GEOSCoordSeq-setY-r ctx coordseq idx (coerce value 'double-float)))
 
-(defgeos coordseq-gety (coordseq idx)
+(defun coordseq-gety (ctx coordseq idx)
   (with-foreign-object (value :double)
-    (GEOSCoordSeq-getY-r *geos-context-handle* coordseq idx value)
+    (GEOSCoordSeq-getY-r ctx coordseq idx value)
     (mem-ref value :double)))
 
-(defgeos coordseq-setz (coordseq idx value)
-  (GEOSCoordSeq-setZ-r *geos-context-handle* coordseq idx (coerce value 'double-float)))
+(defun coordseq-setz (ctx coordseq idx value)
+  (GEOSCoordSeq-setZ-r ctx coordseq idx (coerce value 'double-float)))
 
-(defgeos coordseq-getz (coordseq idx)
+(defun coordseq-getz (ctx coordseq idx)
   (with-foreign-object (value :double)
-    (GEOSCoordSeq-getZ-r *geos-context-handle* coordseq idx value)
+    (GEOSCoordSeq-getZ-r ctx coordseq idx value)
     (mem-ref value :double)))
 
-(defgeos coordseq-set-ordinate (coordseq idx dim value)
-  (GEOSCoordSeq-setOrdinate-r *geos-context-handle* coordseq idx dim (coerce value 'double-float)))
+(defun coordseq-set-ordinate (ctx coordseq idx dim value)
+  (GEOSCoordSeq-setOrdinate-r ctx coordseq idx dim (coerce value 'double-float)))
 
-(defgeos coordseq-get-ordinate (coordseq idx dim)
+(defun coordseq-get-ordinate (ctx coordseq idx dim)
   (with-foreign-object (value :double)
-    (GEOSCoordSeq-getOrdinate-r *geos-context-handle* coordseq idx dim value)
+    (GEOSCoordSeq-getOrdinate-r ctx coordseq idx dim value)
     (mem-ref value :double)))
 
 (defctype %WKTReader :pointer)
